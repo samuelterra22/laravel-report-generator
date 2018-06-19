@@ -1,0 +1,37 @@
+{
+  "name": "samuelterra22/laravel-report-generator",
+  "description": "Rapidly Generate Simple Pdf & Excel Report on Laravel 5 (Using Barryvdh/DomPdf or Barryvdh/laravel-snappy & maatwebsite/excel)",
+  "keywords": [
+    "laravel",
+    "excel",
+    "pdf",
+    "report",
+    "excel report",
+    "pdf report"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Samuel Terra",
+      "email": "samuelterra22@hotmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.9",
+    "illuminate/support": "~5",
+    "maatwebsite/excel": "~2.1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "SamuelTerra22\\ReportGenerator\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "SamuelTerra22\\ReportGenerator\\ServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "dev"
+}
