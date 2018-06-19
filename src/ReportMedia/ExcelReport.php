@@ -111,7 +111,7 @@ class ExcelReport extends ReportGenerator
                 });
 
                 if ($this->showTotalColumns) {
-                    $totalRows = collect(['Grand Total']);
+                    $totalRows = collect(['Total']);
                     array_shift($columns);
                     foreach ($columns as $columnName) {
                         if (array_key_exists($columnName, $this->showTotalColumns)) {

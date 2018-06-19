@@ -185,7 +185,7 @@ if ($showTotalColumns != []) {
 
                     if ($isOnSameGroup === false) {
                         echo '<tr class="bg-black f-white">
-		    							<td colspan="' . $grandTotalSkip . '"><b>Grand Total</b></td>';
+		    							<td colspan="' . $grandTotalSkip . '"><b>Total</b></td>';
                         $dataFound = false;
                         foreach ($columns as $colName => $colData) {
                             if (array_key_exists($colName, $showTotalColumns)) {
@@ -205,7 +205,7 @@ if ($showTotalColumns != []) {
                         }
                         echo '</tr>';//<tr style="height: 10px;"><td colspan="99">&nbsp;</td></tr>';
 
-                        // Reset No, Reset Grand Total
+                        // Reset No, Reset Total
                         $no = 1;
                         foreach ($showTotalColumns as $showTotalColumn => $type) {
                             $total[$showTotalColumn] = 0;
@@ -258,7 +258,7 @@ if ($showTotalColumns != []) {
             ?>
             @if ($showTotalColumns != [] && $ctr > 1)
                 <tr class="bg-black f-white">
-                    <td colspan="{{ $grandTotalSkip }}"><b>Grand Total</b></td> {{-- For Number --}}
+                    <td colspan="{{ $grandTotalSkip }}"><b>Total</b></td> {{-- For Number --}}
                     <?php $dataFound = false; ?>
                     @foreach ($columns as $colName => $colData)
                         @if (array_key_exists($colName, $showTotalColumns))

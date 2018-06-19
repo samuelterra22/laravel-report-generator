@@ -156,7 +156,7 @@ if ($showTotalColumns != []) {
                 }
                 echo '</tr>';//<tr style="height: 10px;"><td colspan="99">&nbsp;</td></tr>';
 
-                // Reset No, Reset Grand Total
+                // Reset No, Reset Total
                 $no = 1;
                 foreach ($showTotalColumns as $showTotalColumn => $type) {
                     $total[$showTotalColumn] = 0;
@@ -209,7 +209,7 @@ if ($showTotalColumns != []) {
     ?>
     @if ($showTotalColumns != [] && $ctr > 1)
         <tr class="f-white">
-            <td colspan="{{ $grandTotalSkip }}" class="bg-black"><b>Grand Total</b></td> {{-- For Number --}}
+            <td colspan="{{ $grandTotalSkip }}" class="bg-black"><b>Total</b></td> {{-- For Number --}}
             <?php $dataFound = false; ?>
             @foreach ($columns as $colName => $colData)
                 @if (array_key_exists($colName, $showTotalColumns))

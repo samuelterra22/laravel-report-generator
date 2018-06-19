@@ -140,7 +140,7 @@ $columns = [
 ];
 ```
 ### Output Report
-![Output Report with Grand Total](https://raw.githubusercontent.com/Jimmy-JS/laravel-report-generator/master/screenshots/report-with-total.png)
+![Output Report with Total](https://raw.githubusercontent.com/Jimmy-JS/laravel-report-generator/master/screenshots/report-with-total.png)
 
 
 ### Example Code With Group By
@@ -186,7 +186,7 @@ Or, you can total all records by group using `groupBy` method
 **PLEASE TAKE NOTE TO SORT GROUPBY COLUMN VIA QUERY FIRST TO USE THIS GROUP BY METHOD.**
 
 ### Output Report With Group By Registered At
-![Output Report with Group By Grand Total](https://raw.githubusercontent.com/Jimmy-JS/laravel-report-generator/master/screenshots/report-with-group-by.png)
+![Output Report with Group By Total](https://raw.githubusercontent.com/Jimmy-JS/laravel-report-generator/master/screenshots/report-with-group-by.png)
 
 
 ## Other Method

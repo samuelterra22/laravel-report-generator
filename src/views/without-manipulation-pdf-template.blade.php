@@ -168,7 +168,7 @@ if ($showTotalColumns != []) {
             ?>
             @if ($showTotalColumns != [] && $ctr > 1)
                 <tr class="bg-black f-white">
-                    <td colspan="{{ $grandTotalSkip }}"><b>Grand Total</b></td> {{-- For Number --}}
+                    <td colspan="{{ $grandTotalSkip }}"><b>Total</b></td> {{-- For Number --}}
                     <?php $dataFound = false; ?>
                     @foreach ($columns as $colName => $colData)
                         @if (array_key_exists($colName, $showTotalColumns))
