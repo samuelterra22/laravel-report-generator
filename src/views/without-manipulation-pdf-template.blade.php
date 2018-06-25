@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i&amp;subset=latin-ext"
+          rel="stylesheet">
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Lato', Arial, Helvetica, sans-serif;
         }
 
         .wrapper {
@@ -194,13 +196,13 @@ if ($showTotalColumns != []) {
 <script type="text/php">
             @if (strtolower($orientation) == 'portrait')
         if ( isset($pdf) ) {
-            $pdf->page_text(30, ($pdf->get_height() - 26.89), "Date Printed: " . date('d M Y H:i:s'), null, 10);
-            $pdf->page_text(($pdf->get_width() - 84), ($pdf->get_height() - 26.89), "Page {PAGE_NUM} of {PAGE_COUNT}", null, 10);
+            $pdf->page_text(30, ($pdf->get_height() - 26.89), "Data de impressão: " . date('d M Y H:i:s'), null, 10);
+            $pdf->page_text(($pdf->get_width() - 84), ($pdf->get_height() - 26.89), "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10);
         }
 @elseif (strtolower($orientation) == 'landscape')
         if ( isset($pdf) ) {
-            $pdf->page_text(30, ($pdf->get_height() - 26.89), "Date Printed: " . date('d M Y H:i:s'), null, 10);
-            $pdf->page_text(($pdf->get_width() - 84), ($pdf->get_height() - 26.89), "Page {PAGE_NUM} of {PAGE_COUNT}", null, 10);
+            $pdf->page_text(30, ($pdf->get_height() - 26.89), "Data de impressão: " . date('d M Y H:i:s'), null, 10);
+            $pdf->page_text(($pdf->get_width() - 84), ($pdf->get_height() - 26.89), "Página {PAGE_NUM} de {PAGE_COUNT}", null, 10);
         }
 @endif
 </script>
