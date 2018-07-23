@@ -50,7 +50,11 @@ class ServiceProvider extends IlluminateServiceProvider
 
         $this->publishes([
             __DIR__ . '/../config/report-generator.php' => config_path('report-generator.php')
-        ], 'config');
+        ], 'laravel-report:config');
+
+        $this->publishes([
+            __DIR__ . '/views' => resource_path('views/vendor/jimmyjs'),
+        ], 'laravel-report:view-template');
     }
 
     protected function registerAliases()
