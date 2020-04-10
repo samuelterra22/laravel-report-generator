@@ -31,7 +31,8 @@ Also, You can use `PdfReport`, `ExcelReport` or `CSVReport` facade for shorter c
 // PdfReport Aliases
 use PdfReport;
 
-public function displayReport(Request $request) {
+public function displayReport(Request $request)
+{
     // Retrieve any filters
     $fromDate = $request->input('from_date');
     $toDate = $request->input('to_date');
@@ -43,20 +44,28 @@ public function displayReport(Request $request) {
     // For displaying filters description on header
     $meta = [
         'Registered on' => $fromDate . ' To ' . $toDate,
-        'Sort By' => $sortBy
+        'Sort By'       => $sortBy
     ];
 
     // Do some querying..
-    $queryBuilder = User::select(['name', 'balance', 'registered_at'])
-                        ->whereBetween('registered_at', [$fromDate, $toDate])
-                        ->orderBy($sortBy);
+    $queryBuilder = User::select([
+        'name',
+        'balance',
+        'registered_at'
+    ])
+        ->whereBetween('registered_at', [
+            $fromDate,
+            $toDate
+        ])
+        ->orderBy($sortBy);
 
     // Set Column to be displayed
     $columns = [
         'Name' => 'name',
-        'Registered At', // if no column_name specified, this will automatically seach for snake_case of column name (will be registered_at) column from query result
+        'Registered At',
+        // if no column_name specified, this will automatically seach for snake_case of column name (will be registered_at) column from query result
         'Total Balance' => 'balance',
-        'Status' => function($result) { // You can do if statement or any action do you want inside this closure
+        'Status' => function ($result) { // You can do if statement or any action do you want inside this closure
             return ($result->balance > 100000) ? 'Rich Man' : 'Normal Guy';
         }
     ];
@@ -73,25 +82,30 @@ public function displayReport(Request $request) {
         - make()       : Will producing DomPDF / SnappyPdf instance so you could do any other DomPDF / snappyPdf method such as stream() or download()
     */
     return PdfReport::of($title, $meta, $queryBuilder, $columns)
-                    ->editColumn('Registered At', [
-                        'displayAs' => function($result) {
-                            return $result->registered_at->format('d M Y');
-                        }
-                    ])
-                    ->editColumn('Total Balance', [
-                        'displayAs' => function($result) {
-                            return thousandSeparator($result->balance);
-                        }
-                    ])
-                    ->editColumns(['Total Balance', 'Status'], [
-                        'class' => 'right bold'
-                    ])
-                    ->showTotal([
-                        'Total Balance' => 'point' // if you want to show dollar sign ($) then use 'Total Balance' => '$'
-                    ])
-                    ->limit(20)
-                    ->stream(); // or download('filename here..') to download pdf
+        ->editColumn('Registered At', [
+            'displayAs' => function ($result) {
+                return $result->registered_at->format('d M Y');
+            }
+        ])
+        ->editColumn('Total Balance', [
+            'displayAs' => function ($result) {
+                return thousandSeparator($result->balance);
+            }
+        ])
+        ->editColumns([
+            'Total Balance',
+            'Status'
+        ], [
+            'class' => 'right bold'
+        ])
+        ->showTotal([
+            'Total Balance' => 'point'
+            // if you want to show dollar sign ($) then use 'Total Balance' => '$'
+        ])
+        ->limit(20)
+        ->stream(); // or download('filename here..') to download pdf
 }
+
 ```
 
 Note: For downloading to excel, just change `PdfReport` facade to `ExcelReport` facade no more modifications
@@ -146,7 +160,7 @@ $columns = [
 ### Example Code With Group By
 Or, you can total all records by group using `groupBy` method
 ```php
-    ...
+    // ...
     // Do some querying..
     $queryBuilder = User::select(['name', 'balance', 'registered_at'])
                         ->whereBetween('registered_at', [$fromDate, $toDate])
@@ -161,26 +175,28 @@ Or, you can total all records by group using `groupBy` method
             return ($result->balance > 100000) ? 'Rich Man' : 'Normal Guy';
         }
     ];
+
     return PdfReport::of($title, $meta, $queryBuilder, $columns)
-                    ->editColumn('Registered At', [
-                        'displayAs' => function($result) {
-                            return $result->registered_at->format('d M Y');
-                        }
-                    ])
-                    ->editColumn('Total Balance', [
-                        'class' => 'right bold',
-                        'displayAs' => function($result) {
-                            return thousandSeparator($result->balance);
-                        }
-                    ])
-                    ->editColumn('Status', [
-                        'class' => 'right bold',
-                    ])
-                    ->groupBy('Registered At')
-                    ->showTotal([
-                        'Total Balance' => 'point'
-                    ])
-                    ->stream();
+        ->editColumn('Registered At', [
+            'displayAs' => function ($result) {
+                return $result->registered_at->format('d M Y');
+            }
+        ])
+        ->editColumn('Total Balance', [
+            'class'     => 'right bold',
+            'displayAs' => function ($result) {
+                return thousandSeparator($result->balance);
+            }
+        ])
+        ->editColumn('Status', [
+            'class' => 'right bold',
+        ])
+        ->groupBy('Registered At')
+        ->showTotal([
+            'Total Balance' => 'point'
+        ])
+        ->stream();
+
 ```
 
 **PLEASE TAKE NOTE TO SORT GROUPBY COLUMN VIA QUERY FIRST TO USE THIS GROUP BY METHOD.**
@@ -217,14 +233,14 @@ PdfReport::of($title, $meta, $queryBuilder, $columns)
 **Usage:**
 ```php
 ExcelReport::of($title, $meta, $queryBuilder, $columns)
-            ->editColumn('Registered At', [
-                'class' => 'right bolder italic-red'
-            ])
-            ->setCss([
-                '.bolder' => 'font-weight: 800;',
-                '.italic-red' => 'color: red;font-style: italic;'
-            ])
-            ->make();
+    ->editColumn('Registered At', [
+        'class' => 'right bolder italic-red'
+    ])
+    ->setCss([
+        '.bolder'     => 'font-weight: 800;',
+        '.italic-red' => 'color: red;font-style: italic;'
+    ])
+    ->make();
 ```
 
 ### 3. setOrientation($orientation = 'portrait')
