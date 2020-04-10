@@ -11,7 +11,6 @@ use SamuelTerra22\ReportGenerator\ReportGenerator;
 class CSVReport extends ReportGenerator
 {
     protected $showMeta = false;
-    protected $showHeader = true;
 
     public function download($filename)
     {
@@ -32,32 +31,31 @@ class CSVReport extends ReportGenerator
         }
 
         $ctr = 1;
-        $chunkRecordCount = ($this->limit == null || $this->limit > 50000) ? 50000 : $this->limit + 1;
 
         if ($this->showHeader) {
             $columns = array_keys($this->columns);
+            if (!$this->withoutManipulation && $this->showNumColumn) {
+                array_unshift($columns, 'No');
+            }
             $csv->insertOne($columns);
         }
 
-        $this->query->chunk($chunkRecordCount, function ($results) use (&$ctr, $csv) {
-            foreach ($results as $result) {
-                if ($this->limit != null && $ctr == $this->limit + 1) {
-                    return false;
+        foreach ($this->query->take($this->limit ?: null)->cursor() as $result) {
+            if ($this->withoutManipulation) {
+                $data = $result->toArray();
+                if (count($data) > count($this->columns)) {
+                    array_pop($data);
                 }
-                if ($this->withoutManipulation) {
-                    $csv->insertOne($result->toArray());
-                } else {
-                    $formattedRows = $this->formatRow($result);
+                $csv->insertOne($data);
+            } else {
+                $formattedRows = $this->formatRow($result);
+                if ($this->showNumColumn) {
                     array_unshift($formattedRows, $ctr);
-                    $csv->insertOne($formattedRows);
                 }
-                $ctr++;
+                $csv->insertOne($formattedRows);
             }
-
-            if ($this->applyFlush) {
-                flush();
-            }
-        });
+            $ctr++;
+        }
 
         $csv->output($filename . '.csv');
     }

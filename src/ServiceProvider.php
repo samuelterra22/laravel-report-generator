@@ -7,10 +7,6 @@ use SamuelTerra22\ReportGenerator\ReportMedia\CSVReport;
 use SamuelTerra22\ReportGenerator\ReportMedia\ExcelReport;
 use SamuelTerra22\ReportGenerator\ReportMedia\PdfReport;
 
-use \SamuelTerra22\ReportGenerator\Facades\PdfReportFacade;
-use \SamuelTerra22\ReportGenerator\Facades\ExcelReportFacade;
-use \SamuelTerra22\ReportGenerator\Facades\CSVReportFacade;
-
 class ServiceProvider extends IlluminateServiceProvider
 {
     /**
@@ -46,14 +42,18 @@ class ServiceProvider extends IlluminateServiceProvider
 
     public function boot()
     {
-        $this->loadViewsFrom(__DIR__ . '/views', 'report-generator-view');
+        if ($this->isLumen()) {
+            require_once 'Lumen.php';
+        }
+
+        $this->loadViewsFrom(__DIR__ . '/views', 'laravel-report-generator');
 
         $this->publishes([
             __DIR__ . '/../config/report-generator.php' => config_path('report-generator.php')
         ], 'laravel-report:config');
 
         $this->publishes([
-            __DIR__ . '/views' => resource_path('views/vendor/jimmyjs'),
+            __DIR__ . '/views' => base_path('resources/views/vendor/laravel-report-generator')
         ], 'laravel-report:view-template');
     }
 
@@ -61,9 +61,9 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         if (class_exists('Illuminate\Foundation\AliasLoader')) {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias('PdfReport', PdfReportFacade::class);
-            $loader->alias('ExcelReport', ExcelReportFacade::class);
-            $loader->alias('CSVReport', CSVReportFacade::class);
+            $loader->alias('PdfReport', \SamuelTerra22\ReportGenerator\Facades\PdfReportFacade::class);
+            $loader->alias('ExcelReport', \SamuelTerra22\ReportGenerator\Facades\ExcelReportFacade::class);
+            $loader->alias('CSVReport', \SamuelTerra22\ReportGenerator\Facades\CSVReportFacade::class);
         }
     }
 
@@ -77,4 +77,8 @@ class ServiceProvider extends IlluminateServiceProvider
         return [];
     }
 
+    protected function isLumen()
+    {
+        return str_contains($this->app->version(), 'Lumen');
+    }
 }

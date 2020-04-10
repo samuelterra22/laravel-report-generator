@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i&amp;subset=latin-ext"
-          rel="stylesheet">
     <style>
         body {
-            font-family: 'Lato', Arial, Helvetica, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         .wrapper {
@@ -34,6 +32,18 @@
             padding-bottom: 4px;
             border-style: none none ridge none;
             font-size: 18px;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-row-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
         }
 
         table.table {
@@ -72,12 +82,8 @@
 
         @foreach ($styles as $style)
         {{ $style['selector'] }}
-
-
         {
         {{ $style['style'] }}
-
-
 
         }
         @endforeach
@@ -87,10 +93,10 @@
 <?php
 $ctr = 1;
 $no = 1;
-$currentGroupByData = [];
 $total = [];
-$isOnSameGroup = true;
 $grandTotalSkip = 1;
+$currentGroupByData = [];
+$isOnSameGroup = true;
 
 foreach ($showTotalColumns as $column => $type) {
     $total[$column] = 0;
@@ -105,6 +111,8 @@ if ($showTotalColumns != []) {
         }
     }
 }
+
+$grandTotalSkip = !$showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
 ?>
 <div class="wrapper">
     <div class="pb-5">
@@ -148,27 +156,9 @@ if ($showTotalColumns != []) {
                 </thead>
             @endif
             <?php
-            $chunkRecordCount = ($limit == null || $limit > 50000) ? 50000 : $limit + 1;
             $__env = isset($__env) ? $__env : null;
-            $query->chunk($chunkRecordCount, function($results) use (
-                &$ctr,
-                &$no,
-                &$total,
-                &$currentGroupByData,
-                &
-                $isOnSameGroup,
-                $grandTotalSkip,
-                $columns,
-                $limit,
-                $editColumns,
-                $showTotalColumns,
-                $groupByArr,
-                $applyFlush,
-                $showNumColumn,
-                $__env
-            ) {
             ?>
-            @foreach($results as $result)
+            @foreach($query->when($limit, function($qry) use($limit) { $qry->take($limit); })->cursor() as $result)
                 <?php
                 if ($limit != null && $ctr == $limit + 1) return false;
                 if ($groupByArr) {
@@ -180,6 +170,7 @@ if ($showTotalColumns != []) {
                             $thisGroupByData[$groupBy] = $result->{$columns[$groupBy]};
                         }
 
+
                         if (isset($currentGroupByData[$groupBy])) {
                             if ($thisGroupByData[$groupBy] != $currentGroupByData[$groupBy]) {
                                 $isOnSameGroup = false;
@@ -190,8 +181,10 @@ if ($showTotalColumns != []) {
                     }
 
                     if ($isOnSameGroup === false) {
-                        echo '<tr class="bg-black f-white">
-		    							<td colspan="' . $grandTotalSkip . '"><b>Total</b></td>';
+                        echo '<tr class="bg-black f-white">';
+                        if ($showNumColumn || $grandTotalSkip > 1) {
+                            echo '<td colspan="' . $grandTotalSkip . '"><b>Grand Total</b></td>';
+                        }
                         $dataFound = false;
                         foreach ($columns as $colName => $colData) {
                             if (array_key_exists($colName, $showTotalColumns)) {
@@ -209,9 +202,9 @@ if ($showTotalColumns != []) {
                                 }
                             }
                         }
-                        echo '</tr>';//<tr style="height: 10px;"><td colspan="99">&nbsp;</td></tr>';
+                        echo '</tr>';
 
-                        // Reset No, Reset Total
+                        // Reset No, Reset Grand Total
                         $no = 1;
                         foreach ($showTotalColumns as $showTotalColumn => $type) {
                             $total[$showTotalColumn] = 0;
@@ -258,13 +251,11 @@ if ($showTotalColumns != []) {
                 </tr>
                 <?php $ctr++; $no++; ?>
             @endforeach
-            <?php
-            if ($applyFlush) flush();
-            });
-            ?>
             @if ($showTotalColumns != [] && $ctr > 1)
                 <tr class="bg-black f-white">
-                    <td colspan="{{ $grandTotalSkip }}"><b>Total</b></td> {{-- For Number --}}
+                    @if ($showNumColumn || $grandTotalSkip > 1)
+                        <td colspan="{{ $grandTotalSkip }}"><b>Grand Total</b></td> {{-- For Number --}}
+                    @endif
                     <?php $dataFound = false; ?>
                     @foreach ($columns as $colName => $colData)
                         @if (array_key_exists($colName, $showTotalColumns))
