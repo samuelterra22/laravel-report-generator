@@ -3,6 +3,7 @@
 namespace SamuelTerra22\ReportGenerator;
 
 use Config;
+use Illuminate\Support\Str;
 
 class ReportGenerator
 {
@@ -82,7 +83,7 @@ class ReportGenerator
 
         foreach ($columns as $name => $data) {
             if (is_int($name)) {
-                $result[$data] = snake_case($data);
+                $result[$data] = Str::snake($data);
             } else {
                 $result[$name] = $data;
             }

@@ -3,6 +3,7 @@
 namespace SamuelTerra22\ReportGenerator;
 
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use Illuminate\Support\Str;
 use SamuelTerra22\ReportGenerator\ReportMedia\CSVReport;
 use SamuelTerra22\ReportGenerator\ReportMedia\ExcelReport;
 use SamuelTerra22\ReportGenerator\ReportMedia\PdfReport;
@@ -79,6 +80,6 @@ class ServiceProvider extends IlluminateServiceProvider
 
     protected function isLumen()
     {
-        return str_contains($this->app->version(), 'Lumen');
+        return Str::contains($this->app->version(), 'Lumen');
     }
 }
