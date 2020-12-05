@@ -2,6 +2,7 @@
 
 namespace SamuelTerra22\ReportGenerator\ReportMedia;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use SamuelTerra22\ReportGenerator\ReportGenerator;
 
 class PdfReport extends ReportGenerator
@@ -37,10 +38,10 @@ class PdfReport extends ReportGenerator
             $pdf->setOption('footer-font-size', 10);
             $pdf->setOption('footer-left', 'Page [page] of [topage]');
             $pdf->setOption('footer-right', 'Date Printed: ' . date('d M Y H:i:s'));
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException | BindingResolutionException $e) {
             try {
                 $pdf = \App::make('dompdf.wrapper');
-            } catch (\ReflectionException $e) {
+            } catch (\ReflectionException | BindingResolutionException $e) {
                 throw new \Exception('Please install either barryvdh/laravel-snappy or laravel-dompdf to generate PDF Report!');
             }
         }
