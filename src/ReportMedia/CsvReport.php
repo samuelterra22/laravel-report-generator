@@ -104,7 +104,7 @@ class CsvReport extends ReportGenerator
         $this->fireCallbacks($this->onAfterRenderCallbacks);
 
         if ($this->cacheEnabled) {
-            $this->getCache()->put($this->getCacheKey(), $csv->toString(), $this->cacheDuration * 60);
+            $this->getCache()->put($this->getCacheKey(), (string) $csv, $this->cacheDuration * 60);
         }
 
         $this->fireCallbacks($this->onCompleteCallbacks);
