@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - '**.php'
       - '.github/workflows/run-tests.yml'
@@ -10,7 +10,7 @@ on:
       - 'composer.json'
       - 'composer.lock'
   pull_request:
-    branches: [master]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

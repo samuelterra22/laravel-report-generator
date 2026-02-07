@@ -15,13 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
       - uses: stefanzweifel/changelog-updater-action@v1
         with:
           latest-version: ${{ github.event.release.name }}
           release-notes: ${{ github.event.release.body }}
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          branch: master
+          branch: main
           commit_message: 'docs: update CHANGELOG'
           file_pattern: CHANGELOG.md
