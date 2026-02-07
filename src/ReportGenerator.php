@@ -41,6 +41,38 @@ abstract class ReportGenerator
 
     protected $showHeader = true;
 
+    // Feature 1: Column Formatting
+    protected array $columnFormats = [];
+
+    // Feature 3: Report Events/Hooks
+    protected array $onBeforeRenderCallbacks = [];
+
+    protected array $onRowCallbacks = [];
+
+    protected array $onAfterRenderCallbacks = [];
+
+    protected array $onCompleteCallbacks = [];
+
+    // Feature 4: Conditional Formatting
+    protected array $conditionalFormats = [];
+
+    // Feature 5: Custom Headers & Footers
+    protected array $headerContent = [];
+
+    protected array $footerContent = [
+        'left' => 'Date Printed: {date}',
+        'right' => 'Page {page} of {pages}',
+    ];
+
+    // Feature 7: Report Caching
+    protected bool $cacheEnabled = false;
+
+    protected int $cacheDuration = 0;
+
+    protected ?string $cacheKey = null;
+
+    protected ?string $cacheStore = null;
+
     public function __construct()
     {
         $this->applyFlush = (bool) Config::get('report-generator.flush', true);
@@ -173,6 +205,215 @@ abstract class ReportGenerator
                 'selector' => $selector,
                 'style' => $style,
             ]);
+        }
+
+        return $this;
+    }
+
+    // Feature 1: Column Formatting
+
+    public function formatColumn(string $columnName, string $type, array $options = [])
+    {
+        $this->columnFormats[$columnName] = [
+            'type' => $type,
+            'options' => $options,
+        ];
+
+        return $this;
+    }
+
+    public function formatColumns(array $columnNames, string $type, array $options = [])
+    {
+        foreach ($columnNames as $columnName) {
+            $this->formatColumn($columnName, $type, $options);
+        }
+
+        return $this;
+    }
+
+    // Feature 3: Report Events/Hooks
+
+    public function onBeforeRender(callable $callback)
+    {
+        $this->onBeforeRenderCallbacks[] = $callback;
+
+        return $this;
+    }
+
+    public function onRow(callable $callback)
+    {
+        $this->onRowCallbacks[] = $callback;
+
+        return $this;
+    }
+
+    public function onAfterRender(callable $callback)
+    {
+        $this->onAfterRenderCallbacks[] = $callback;
+
+        return $this;
+    }
+
+    public function onComplete(callable $callback)
+    {
+        $this->onCompleteCallbacks[] = $callback;
+
+        return $this;
+    }
+
+    protected function fireCallbacks(array $callbacks, mixed ...$args): void
+    {
+        foreach ($callbacks as $callback) {
+            $callback(...$args);
+        }
+    }
+
+    // Feature 4: Conditional Formatting
+
+    public function conditionalFormat(string $columnName, callable $condition, array $styles)
+    {
+        $this->conditionalFormats[$columnName][] = [
+            'condition' => $condition,
+            'styles' => $styles,
+        ];
+
+        return $this;
+    }
+
+    // Feature 5: Custom Headers & Footers
+
+    public function setHeaderContent(string $content, string $position = 'center')
+    {
+        $this->headerContent[$position] = $content;
+
+        return $this;
+    }
+
+    public function setFooterContent(string $content, string $position = 'center')
+    {
+        $this->footerContent[$position] = $content;
+
+        return $this;
+    }
+
+    public function clearFooter()
+    {
+        $this->footerContent = [];
+
+        return $this;
+    }
+
+    public function clearHeader()
+    {
+        $this->headerContent = [];
+
+        return $this;
+    }
+
+    protected function resolveFooterPlaceholders(string $content): string
+    {
+        return str_replace(
+            ['{date}', '{title}'],
+            [date('d M Y H:i:s'), $this->headers['title'] ?? ''],
+            $content
+        );
+    }
+
+    // Feature 7: Report Caching
+
+    public function cacheFor(int $minutes)
+    {
+        $this->cacheEnabled = true;
+        $this->cacheDuration = $minutes;
+
+        return $this;
+    }
+
+    public function cacheAs(string $key)
+    {
+        $this->cacheKey = $key;
+
+        return $this;
+    }
+
+    public function cacheUsing(string $store)
+    {
+        $this->cacheStore = $store;
+
+        return $this;
+    }
+
+    public function noCache()
+    {
+        $this->cacheEnabled = false;
+
+        return $this;
+    }
+
+    protected function getCacheKey(): string
+    {
+        if ($this->cacheKey) {
+            return $this->cacheKey;
+        }
+
+        $prefix = Config::get('report-generator.cache_prefix', 'report-generator');
+        $title = $this->headers['title'] ?? '';
+        $columnKeys = is_array($this->columns) ? implode(',', array_keys($this->columns)) : '';
+        $meta = is_array($this->headers['meta'] ?? null) ? implode(',', $this->headers['meta']) : '';
+        $limit = (string) ($this->limit ?? '');
+        $groupBy = implode(',', $this->groupByArr);
+
+        return $prefix.':'.md5($title.$columnKeys.$meta.$limit.$groupBy);
+    }
+
+    protected function getCache(): \Illuminate\Contracts\Cache\Repository
+    {
+        $store = $this->cacheStore ?? Config::get('report-generator.cache_store');
+
+        return \Cache::store($store);
+    }
+
+    // Feature 6: Multi-Format Export (state transfer)
+
+    public function getBuilderState(): array
+    {
+        return [
+            'headers' => $this->headers,
+            'columns' => $this->columns,
+            'query' => $this->query,
+            'limit' => $this->limit,
+            'groupByArr' => $this->groupByArr,
+            'paper' => $this->paper,
+            'orientation' => $this->orientation,
+            'editColumns' => $this->editColumns,
+            'showNumColumn' => $this->showNumColumn,
+            'showTotalColumns' => $this->showTotalColumns,
+            'styles' => $this->styles,
+            'simpleVersion' => $this->simpleVersion,
+            'withoutManipulation' => $this->withoutManipulation,
+            'showMeta' => $this->showMeta,
+            'showHeader' => $this->showHeader,
+            'columnFormats' => $this->columnFormats,
+            'onBeforeRenderCallbacks' => $this->onBeforeRenderCallbacks,
+            'onRowCallbacks' => $this->onRowCallbacks,
+            'onAfterRenderCallbacks' => $this->onAfterRenderCallbacks,
+            'onCompleteCallbacks' => $this->onCompleteCallbacks,
+            'conditionalFormats' => $this->conditionalFormats,
+            'headerContent' => $this->headerContent,
+            'footerContent' => $this->footerContent,
+            'cacheEnabled' => $this->cacheEnabled,
+            'cacheDuration' => $this->cacheDuration,
+            'cacheKey' => $this->cacheKey,
+            'cacheStore' => $this->cacheStore,
+        ];
+    }
+
+    public function applyBuilderState(array $state)
+    {
+        foreach ($state as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
         }
 
         return $this;

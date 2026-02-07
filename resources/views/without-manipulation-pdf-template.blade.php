@@ -83,16 +83,15 @@
 </head>
 <body>
 <?php
+use SamuelTerra22\ReportGenerator\Support\AggregationHelper;
+
 $ctr = 1;
 $no = 1;
-$total = [];
 $grandTotalSkip = 1;
 $currentGroupByData = [];
 $isOnSameGroup = true;
 
-foreach ($showTotalColumns as $column => $type) {
-    $total[$column] = 0;
-}
+$aggState = AggregationHelper::init($showTotalColumns);
 
 if ($showTotalColumns != []) {
     foreach ($columns as $colName => $colData) {
@@ -145,6 +144,7 @@ $grandTotalSkip = !$showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
             @endif
             <?php
             $__env = isset($__env) ? $__env : null;
+            $rowIndex = 0;
             ?>
             @foreach($query->when($limit, function($qry) use($limit) { $qry->take($limit); })->cursor() as $result)
                 <?php
@@ -175,13 +175,7 @@ $grandTotalSkip = !$showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
                         $dataFound = false;
                         foreach ($columns as $colName => $colData) {
                             if (array_key_exists($colName, $showTotalColumns)) {
-                                if ($showTotalColumns[$colName] == 'point') {
-                                    echo '<td class="left"><b>' . number_format($total[$colName], 2, '.',
-                                            ',') . '</b></td>';
-                                } else {
-                                    echo '<td class="left"><b>' . strtoupper($showTotalColumns[$colName]) . ' ' . number_format($total[$colName],
-                                            2, '.', ',') . '</b></td>';
-                                }
+                                echo '<td class="left"><b>' . AggregationHelper::formatResult($aggState, $colName) . '</b></td>';
                                 $dataFound = true;
                             } else {
                                 if ($dataFound) {
@@ -193,10 +187,15 @@ $grandTotalSkip = !$showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
 
                         // Reset No, Reset Grand Total
                         $no = 1;
-                        foreach ($showTotalColumns as $showTotalColumn => $type) {
-                            $total[$showTotalColumn] = 0;
-                        }
+                        AggregationHelper::reset($aggState);
                         $isOnSameGroup = true;
+                    }
+                }
+
+                // Fire onRow callbacks
+                if (isset($onRowCallbacks) && is_array($onRowCallbacks)) {
+                    foreach ($onRowCallbacks as $cb) {
+                        $cb($result, $rowIndex);
                     }
                 }
                 ?>
@@ -214,9 +213,9 @@ $grandTotalSkip = !$showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
                 </tr>
                 <?php
                 foreach ($showTotalColumns as $colName => $type) {
-                    $total[$colName] += $result->{$columns[$colName]};
+                    AggregationHelper::update($aggState, $colName, $result->{$columns[$colName]});
                 }
-                $ctr++; $no++;
+                $ctr++; $no++; $rowIndex++;
                 ?>
             @endforeach
             @if ($showTotalColumns != [] && $ctr > 1)
@@ -228,13 +227,7 @@ $grandTotalSkip = !$showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
                     @foreach ($columns as $colName => $colData)
                         @if (array_key_exists($colName, $showTotalColumns))
                             <?php $dataFound = true; ?>
-                            @if ($showTotalColumns[$colName] == 'point')
-                                <td class="left"><b>{{ number_format($total[$colName], 2, '.', ',') }}</b></td>
-                            @else
-                                <td class="left">
-                                    <b>{{ strtoupper($showTotalColumns[$colName]) }} {{ number_format($total[$colName], 2, '.', ',') }}</b>
-                                </td>
-                            @endif
+                            <td class="left"><b>{{ \SamuelTerra22\ReportGenerator\Support\AggregationHelper::formatResult($aggState, $colName) }}</b></td>
                         @else
                             @if ($dataFound)
                                 <td></td>
@@ -247,17 +240,14 @@ $grandTotalSkip = !$showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
     </div>
 </div>
 <script type="text/php">
-            @if (strtolower($orientation) == 'portrait')
-        if ( isset($pdf) ) {
-            $pdf->page_text(30, ($pdf->get_height() - 26.89), "Date Printed: " . date('d M Y H:i:s'), null, 10);
-            $pdf->page_text(($pdf->get_width() - 84), ($pdf->get_height() - 26.89), "Page {PAGE_NUM} of {PAGE_COUNT}", null, 10);
-        }
-@elseif (strtolower($orientation) == 'landscape')
-        if ( isset($pdf) ) {
-            $pdf->page_text(30, ($pdf->get_height() - 26.89), "Date Printed: " . date('d M Y H:i:s'), null, 10);
-            $pdf->page_text(($pdf->get_width() - 84), ($pdf->get_height() - 26.89), "Page {PAGE_NUM} of {PAGE_COUNT}", null, 10);
-        }
-@endif
+    if ( isset($pdf) ) {
+        @if (!empty($footerContent['left']))
+            $pdf->page_text(30, ($pdf->get_height() - 26.89), "{!! str_replace(['{page}', '{pages}', '{date}', '{title}'], ['{PAGE_NUM}', '{PAGE_COUNT}', date('d M Y H:i:s'), $headers['title'] ?? ''], $footerContent['left']) !!}", null, 10);
+        @endif
+        @if (!empty($footerContent['right']))
+            $pdf->page_text(($pdf->get_width() - 84), ($pdf->get_height() - 26.89), "{!! str_replace(['{page}', '{pages}', '{date}', '{title}'], ['{PAGE_NUM}', '{PAGE_COUNT}', date('d M Y H:i:s'), $headers['title'] ?? ''], $footerContent['right']) !!}", null, 10);
+        @endif
+    }
 </script>
 </body>
 </html>

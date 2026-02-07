@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Deprecated in PHP 8\.0\: Required parameter \$columns follows optional parameter \$meta\.$#'
-			identifier: parameter.requiredAfterOptional
-			count: 1
-			path: src/ReportGenerator.php
-
-		-
-			message: '#^Deprecated in PHP 8\.0\: Required parameter \$query follows optional parameter \$meta\.$#'
-			identifier: parameter.requiredAfterOptional
-			count: 1
-			path: src/ReportGenerator.php
-
-		-
 			message: '''
 				#^Call to deprecated method createFromFileObject\(\) of class League\\Csv\\AbstractCsv\:
 				since version 9\.27\.0
@@ -31,12 +19,6 @@ parameters:
 			identifier: method.deprecated
 			count: 1
 			path: src/ReportMedia/CsvReport.php
-
-		-
-			message: '#^Anonymous function has an unused use \$filename\.$#'
-			identifier: closure.unusedUse
-			count: 2
-			path: src/ReportMedia/ExcelReport.php
 
 		-
 			message: '#^Parameter \#1 \.\.\.\$values of method Illuminate\\Support\\Collection\<int,string\>\:\:push\(\) expects string, null given\.$#'

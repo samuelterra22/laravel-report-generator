@@ -7,6 +7,8 @@ namespace SamuelTerra22\ReportGenerator\ReportMedia;
 use App;
 use Closure;
 use SamuelTerra22\ReportGenerator\ReportGenerator;
+use SamuelTerra22\ReportGenerator\Support\AggregationHelper;
+use SamuelTerra22\ReportGenerator\Support\ColumnFormatter;
 
 class ExcelReport extends ReportGenerator
 {
@@ -23,6 +25,8 @@ class ExcelReport extends ReportGenerator
 
     public function make($filename, $simpleVersion = false)
     {
+        $this->fireCallbacks($this->onBeforeRenderCallbacks);
+
         if ($simpleVersion) {
             return App::make('excel')->create($filename, function ($excel) {
                 $excel->sheet('Sheet 1', function ($sheet) {
@@ -31,9 +35,7 @@ class ExcelReport extends ReportGenerator
                     $grandTotalSkip = 1;
                     $currentGroupByData = [];
                     $isOnSameGroup = true;
-                    foreach ($this->showTotalColumns as $column => $type) {
-                        $this->total[$column] = 0;
-                    }
+                    $aggState = AggregationHelper::init($this->showTotalColumns);
                     if ($this->showTotalColumns != []) {
                         foreach ($this->columns as $colName => $colData) {
                             if (! array_key_exists($colName, $this->showTotalColumns)) {
@@ -66,6 +68,7 @@ class ExcelReport extends ReportGenerator
                         $sheet->appendRow($columns);
                     }
 
+                    $rowIndex = 0;
                     foreach ($this->query->take($this->limit ?: null)->cursor() as $result) {
                         if ($this->groupByArr) {
                             $isOnSameGroup = true;
@@ -92,12 +95,7 @@ class ExcelReport extends ReportGenerator
                                         continue;
                                     }
                                     if (array_key_exists($columnName, $this->showTotalColumns)) {
-                                        if ($this->showTotalColumns[$columnName] == 'point') {
-                                            $totalRows->push(number_format($this->total[$columnName], 2, '.', ','));
-                                        } else {
-                                            $totalRows->push(strtoupper($this->showTotalColumns[$columnName]).' '.number_format($this->total[$columnName],
-                                                2, '.', ','));
-                                        }
+                                        $totalRows->push(AggregationHelper::formatResult($aggState, $columnName));
                                     } else {
                                         $totalRows->push(null);
                                     }
@@ -106,12 +104,13 @@ class ExcelReport extends ReportGenerator
 
                                 // Reset No, Reset Grand Total
                                 $no = 1;
-                                foreach ($this->showTotalColumns as $showTotalColumn => $type) {
-                                    $this->total[$showTotalColumn] = 0;
-                                }
+                                AggregationHelper::reset($aggState);
                                 $isOnSameGroup = true;
                             }
                         }
+
+                        $this->fireCallbacks($this->onRowCallbacks, $result, $rowIndex);
+
                         if ($this->withoutManipulation) {
                             $data = $result->toArray();
                             if (count($data) > count($this->columns)) {
@@ -127,9 +126,10 @@ class ExcelReport extends ReportGenerator
                         }
 
                         foreach ($this->showTotalColumns as $colName => $type) {
-                            $this->total[$colName] += $result->{$this->columns[$colName]};
+                            AggregationHelper::update($aggState, $colName, $result->{$this->columns[$colName]});
                         }
                         $ctr++;
+                        $rowIndex++;
                     }
 
                     if ($this->showTotalColumns) {
@@ -137,12 +137,7 @@ class ExcelReport extends ReportGenerator
                         array_shift($columns);
                         foreach ($columns as $columnName) {
                             if (array_key_exists($columnName, $this->showTotalColumns)) {
-                                if ($this->showTotalColumns[$columnName] == 'point') {
-                                    $totalRows->push(number_format($this->total[$columnName], 2, '.', ','));
-                                } else {
-                                    $totalRows->push(strtoupper($this->showTotalColumns[$columnName]).' '.number_format($this->total[$columnName],
-                                        2, '.', ','));
-                                }
+                                $totalRows->push(AggregationHelper::formatResult($aggState, $columnName));
                             } else {
                                 $totalRows->push(null);
                             }
@@ -150,6 +145,8 @@ class ExcelReport extends ReportGenerator
                         $sheet->appendRow($totalRows->toArray());
                     }
                 });
+
+                $this->fireCallbacks($this->onAfterRenderCallbacks);
             });
         } else {
             return App::make('excel')->create($filename, function ($excel) {
@@ -167,31 +164,46 @@ class ExcelReport extends ReportGenerator
                     $showMeta = $this->showMeta;
                     $applyFlush = $this->applyFlush;
                     $showNumColumn = $this->showNumColumn;
+                    $columnFormats = $this->columnFormats;
+                    $conditionalFormats = $this->conditionalFormats;
+                    $onRowCallbacks = $this->onRowCallbacks;
 
                     $sheet->setColumnFormat(['A:Z' => '@']);
 
                     if ($this->withoutManipulation) {
                         $sheet->loadView('laravel-report-generator::without-manipulation-excel-template',
                             compact('headers', 'columns', 'showTotalColumns', 'query', 'limit', 'groupByArr',
-                                'orientation', 'showHeader', 'showMeta', 'applyFlush', 'showNumColumn'));
+                                'orientation', 'showHeader', 'showMeta', 'applyFlush', 'showNumColumn',
+                                'columnFormats', 'conditionalFormats', 'onRowCallbacks'));
                     } else {
                         $sheet->loadView('laravel-report-generator::general-excel-template',
                             compact('headers', 'columns', 'editColumns', 'showTotalColumns', 'styles', 'query', 'limit',
-                                'groupByArr', 'orientation', 'showHeader', 'showMeta', 'applyFlush', 'showNumColumn'));
+                                'groupByArr', 'orientation', 'showHeader', 'showMeta', 'applyFlush', 'showNumColumn',
+                                'columnFormats', 'conditionalFormats', 'onRowCallbacks'));
                     }
                 });
+
+                $this->fireCallbacks($this->onAfterRenderCallbacks);
             });
         }
     }
 
     public function download($filename)
     {
-        return $this->make($filename, $this->simpleVersion)->export($this->format);
+        $result = $this->make($filename, $this->simpleVersion)->export($this->format);
+
+        $this->fireCallbacks($this->onCompleteCallbacks);
+
+        return $result;
     }
 
     public function simpleDownload($filename)
     {
-        return $this->make($filename, true)->export($this->format);
+        $result = $this->make($filename, true)->export($this->format);
+
+        $this->fireCallbacks($this->onCompleteCallbacks);
+
+        return $result;
     }
 
     private function formatRow($result)
@@ -213,9 +225,15 @@ class ExcelReport extends ReportGenerator
                         $displayedColValue = $displayAs;
                     }
                 }
+            } elseif (array_key_exists($colName, $this->columnFormats)) {
+                $format = $this->columnFormats[$colName];
+                $displayedColValue = ColumnFormatter::format($generatedColData, $format['type'], $format['options']);
             }
 
             if (array_key_exists($colName, $this->showTotalColumns)) {
+                if (! isset($this->total[$colName])) {
+                    $this->total[$colName] = 0;
+                }
                 $this->total[$colName] += $generatedColData;
             }
 

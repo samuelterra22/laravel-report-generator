@@ -22,6 +22,7 @@ abstract class TestCase extends OrchestraTestCase
             'PdfReport' => \SamuelTerra22\ReportGenerator\Facades\PdfReport::class,
             'ExcelReport' => \SamuelTerra22\ReportGenerator\Facades\ExcelReport::class,
             'CsvReport' => \SamuelTerra22\ReportGenerator\Facades\CsvReport::class,
+            'ReportExporter' => \SamuelTerra22\ReportGenerator\Facades\ReportExporter::class,
         ];
     }
 

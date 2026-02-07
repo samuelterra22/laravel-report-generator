@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SamuelTerra22\ReportGenerator\Tests\Unit;
 
+use SamuelTerra22\ReportGenerator\ReportExporter;
 use SamuelTerra22\ReportGenerator\ReportMedia\CsvReport;
 use SamuelTerra22\ReportGenerator\ReportMedia\ExcelReport;
 use SamuelTerra22\ReportGenerator\ReportMedia\PdfReport;
@@ -29,10 +30,23 @@ class ServiceProviderTest extends TestCase
         $this->assertInstanceOf(CsvReport::class, $this->app->make('csv.report.generator'));
     }
 
+    public function test_report_exporter_is_bound()
+    {
+        $this->assertTrue($this->app->bound('report.exporter'));
+        $this->assertInstanceOf(ReportExporter::class, $this->app->make('report.exporter'));
+    }
+
     public function test_config_is_merged()
     {
         $this->assertNotNull(config('report-generator'));
         $this->assertArrayHasKey('flush', config('report-generator'));
+    }
+
+    public function test_config_has_cache_options()
+    {
+        $config = config('report-generator');
+        $this->assertArrayHasKey('cache_store', $config);
+        $this->assertArrayHasKey('cache_prefix', $config);
     }
 
     public function test_views_are_loaded()

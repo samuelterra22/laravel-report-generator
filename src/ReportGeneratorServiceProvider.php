@@ -25,6 +25,7 @@ class ReportGeneratorServiceProvider extends PackageServiceProvider
         $this->app->bind('pdf.report.generator', fn ($app) => new PdfReport);
         $this->app->bind('excel.report.generator', fn ($app) => new ExcelReport);
         $this->app->bind('csv.report.generator', fn ($app) => new CsvReport);
+        $this->app->bind('report.exporter', fn ($app) => new ReportExporter);
         $this->app->register(\Maatwebsite\Excel\ExcelServiceProvider::class);
     }
 }

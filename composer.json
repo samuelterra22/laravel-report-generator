@@ -71,7 +71,8 @@
             "aliases": {
                 "PdfReport": "SamuelTerra22\\ReportGenerator\\Facades\\PdfReport",
                 "ExcelReport": "SamuelTerra22\\ReportGenerator\\Facades\\ExcelReport",
-                "CsvReport": "SamuelTerra22\\ReportGenerator\\Facades\\CsvReport"
+                "CsvReport": "SamuelTerra22\\ReportGenerator\\Facades\\CsvReport",
+                "ReportExporter": "SamuelTerra22\\ReportGenerator\\Facades\\ReportExporter"
             }
         }
     },

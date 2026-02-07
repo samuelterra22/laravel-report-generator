@@ -87,4 +87,74 @@ class ConcreteReportGenerator extends ReportGenerator
     {
         return $this->applyFlush;
     }
+
+    public function getColumnFormats()
+    {
+        return $this->columnFormats;
+    }
+
+    public function getOnBeforeRenderCallbacks()
+    {
+        return $this->onBeforeRenderCallbacks;
+    }
+
+    public function getOnRowCallbacks()
+    {
+        return $this->onRowCallbacks;
+    }
+
+    public function getOnAfterRenderCallbacks()
+    {
+        return $this->onAfterRenderCallbacks;
+    }
+
+    public function getOnCompleteCallbacks()
+    {
+        return $this->onCompleteCallbacks;
+    }
+
+    public function getConditionalFormats()
+    {
+        return $this->conditionalFormats;
+    }
+
+    public function getHeaderContent()
+    {
+        return $this->headerContent;
+    }
+
+    public function getFooterContent()
+    {
+        return $this->footerContent;
+    }
+
+    public function getCacheEnabled()
+    {
+        return $this->cacheEnabled;
+    }
+
+    public function getCacheDuration()
+    {
+        return $this->cacheDuration;
+    }
+
+    public function getCacheKeyValue()
+    {
+        return $this->cacheKey;
+    }
+
+    public function getCacheStore()
+    {
+        return $this->cacheStore;
+    }
+
+    public function getCacheKeyGenerated()
+    {
+        return parent::getCacheKey();
+    }
+
+    public function getBuilderStatePublic()
+    {
+        return $this->getBuilderState();
+    }
 }

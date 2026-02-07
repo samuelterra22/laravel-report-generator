@@ -23,9 +23,14 @@
 **Key features:**
 
 - **Three output formats** -- PDF, Excel (XLSX), and CSV from the same fluent interface
-- **Column formatting** -- Transform displayed values with callbacks (`displayAs`)
+- **Multi-format export** -- Define a report once, export to PDF, Excel, or CSV via `ReportExporter`
+- **Column formatting** -- Transform displayed values with callbacks (`displayAs`) or built-in formatters (currency, date, percentage, etc.)
 - **Row grouping** -- Group rows by one or more columns with automatic subtotals
-- **Grand totals** -- Automatic numeric totals with formatted output
+- **Advanced aggregations** -- `sum`, `avg`, `min`, `max`, and `count` in total rows
+- **Conditional formatting** -- Declarative rules to style cells based on data values
+- **Report events/hooks** -- Lifecycle callbacks (`onBeforeRender`, `onRow`, `onAfterRender`, `onComplete`)
+- **Custom headers & footers** -- Configurable content with placeholders (`{page}`, `{date}`, `{title}`)
+- **Report caching** -- Cache rendered output with TTL and custom keys
 - **Custom CSS** -- Inject custom styles into PDF and Excel reports
 - **Memory efficient** -- Uses cursor-based iteration for large datasets
 - **Customizable templates** -- Publish and modify Blade templates to fit your design
@@ -46,7 +51,13 @@
 - [API Reference](#api-reference)
   - [Initializing a Report](#initializing-a-report)
   - [Column Formatting](#column-formatting)
+  - [Built-in Column Formatters](#built-in-column-formatters)
   - [Grouping & Totals](#grouping--totals)
+  - [Conditional Formatting](#conditional-formatting)
+  - [Report Events / Hooks](#report-events--hooks)
+  - [Custom Headers & Footers](#custom-headers--footers)
+  - [Multi-Format Export](#multi-format-export)
+  - [Report Caching](#report-caching)
   - [Layout & Styling](#layout--styling)
   - [Performance](#performance)
   - [Output Methods](#output-methods)
@@ -317,6 +328,39 @@ Apply the same formatting to multiple columns at once:
 ])
 ```
 
+### Built-in Column Formatters
+
+Use `formatColumn()` for common formatting without writing closures. If a column has both `editColumn` with `displayAs` and `formatColumn`, the `displayAs` callback takes priority.
+
+#### `formatColumn(string $columnName, string $type, array $options = [])`
+
+```php
+->formatColumn('price', 'currency', ['prefix' => 'R$', 'decimals' => 2])
+->formatColumn('created_at', 'date', ['format' => 'd/m/Y'])
+->formatColumn('rate', 'percentage', ['decimals' => 1])
+->formatColumn('active', 'boolean', ['true' => 'Active', 'false' => 'Inactive'])
+->formatColumn('quantity', 'number', ['decimals' => 0, 'thousands_separator' => '.'])
+```
+
+#### `formatColumns(array $columnNames, string $type, array $options = [])`
+
+Apply the same formatter to multiple columns:
+
+```php
+->formatColumns(['Price', 'Total'], 'currency', ['prefix' => '$'])
+```
+
+**Available format types:**
+
+| Type | Options | Default output |
+|------|---------|----------------|
+| `currency` | `prefix` (`$`), `decimals` (`2`), `decimal_separator` (`.`), `thousands_separator` (`,`) | `$ 1,234.56` |
+| `number` | `decimals` (`0`), `decimal_separator` (`.`), `thousands_separator` (`,`) | `1,235` |
+| `date` | `format` (`Y-m-d`) | `2025-01-15` |
+| `datetime` | `format` (`Y-m-d H:i:s`) | `2025-01-15 14:30:00` |
+| `percentage` | `decimals` (`1`), `suffix` (`%`) | `75.0%` |
+| `boolean` | `true` (`Yes`), `false` (`No`) | `Yes` / `No` |
+
 ### Grouping & Totals
 
 #### `groupBy(string|array $column)`
@@ -347,6 +391,178 @@ Display totals for numeric columns. Each entry maps a column name to a display t
 |------|---------------|
 | `'point'` | `1,234.56` (number only) |
 | Any string | `PREFIX 1,234.56` (uppercased prefix + number) |
+
+**Advanced aggregation types** -- beyond `sum`, you can use:
+
+```php
+->showTotal([
+    'amount'   => 'sum',       // Sum of all values (default)
+    'quantity' => 'avg',       // Average
+    'price'    => 'max',       // Maximum value
+    'discount' => 'min',       // Minimum value
+    'orders'   => 'count',     // Number of rows
+    'balance'  => 'point',     // Sum, displayed without a label prefix
+])
+```
+
+| Aggregation | Description |
+|-------------|-------------|
+| `sum` | Sum of all values (default for unknown types) |
+| `avg` | Arithmetic mean |
+| `min` | Minimum value |
+| `max` | Maximum value |
+| `count` | Number of rows |
+| `point` | Same as `sum`, but displayed without a label prefix |
+
+### Conditional Formatting
+
+Apply CSS styles to cells based on their values. In PDF/Excel reports the styles are applied as inline CSS. CSV reports ignore formatting gracefully.
+
+#### `conditionalFormat(string $columnName, callable $condition, array $styles)`
+
+```php
+->conditionalFormat('amount', fn ($value) => $value > 1000, [
+    'class'      => 'bold',
+    'background' => '#ffcccc',
+])
+->conditionalFormat('status', fn ($value) => $value === 'Overdue', [
+    'color'       => '#ff0000',
+    'font-weight' => 'bold',
+])
+```
+
+The condition callback receives `($cellValue, $rowObject)`, so you can also style based on other columns:
+
+```php
+->conditionalFormat('name', fn ($value, $row) => $row->balance < 0, [
+    'color' => 'red',
+])
+```
+
+### Report Events / Hooks
+
+Register callbacks that fire at specific points in the report lifecycle. Useful for logging, progress tracking, auditing, and post-processing.
+
+```php
+->onBeforeRender(function () {
+    Log::info('Report generation started');
+})
+->onRow(function ($row, int $index) {
+    // Fires for each row -- useful for progress tracking
+})
+->onAfterRender(function () {
+    Log::info('Report rendering complete');
+})
+->onComplete(function () {
+    Notification::send($admin, new ReportReadyNotification);
+})
+```
+
+Multiple callbacks can be registered for the same event -- they fire in registration order.
+
+### Custom Headers & Footers
+
+Customize the header and footer content of PDF reports. Supports positional placement and placeholders.
+
+#### `setHeaderContent(string $content, string $position = 'center')`
+
+```php
+->setHeaderContent('Company Report', 'center')
+->setHeaderContent('Confidential', 'left')
+```
+
+#### `setFooterContent(string $content, string $position = 'center')`
+
+```php
+->setFooterContent('Page {page} of {pages}', 'right')
+->setFooterContent('Printed: {date}', 'left')
+```
+
+#### `clearHeader()` / `clearFooter()`
+
+Remove all header or footer content:
+
+```php
+->clearFooter()  // No footer
+```
+
+**Available placeholders:**
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{page}` | Current page number |
+| `{pages}` | Total page count |
+| `{date}` | Current date (`Y-m-d`) |
+| `{title}` | Report title |
+
+**Defaults:**
+
+```php
+// Footer defaults (matches previous behavior)
+'left'  => 'Date Printed: {date}'
+'right' => 'Page {page} of {pages}'
+
+// Header defaults: empty (no header)
+```
+
+### Multi-Format Export
+
+Define a report once and export to multiple formats without duplicating configuration. Use `ReportExporter` to build the report, then call `toPdf()`, `toExcel()`, or `toCsv()`.
+
+```php
+use SamuelTerra22\ReportGenerator\Facades\ReportExporter;
+
+$exporter = ReportExporter::of('Sales Report', $meta, $query, $columns)
+    ->editColumn('amount', ['displayAs' => fn ($r) => '$' . $r->amount])
+    ->formatColumn('date', 'date', ['format' => 'd/m/Y'])
+    ->showTotal(['amount' => 'sum'])
+    ->groupBy('region');
+
+// Export to any format from the same definition:
+$pdf   = $exporter->toPdf()->make();
+$excel = $exporter->toExcel()->download('report');
+$csv   = $exporter->toCsv()->download('report');
+```
+
+`ReportExporter` supports all the same fluent methods as the individual report classes (`editColumn`, `formatColumn`, `groupBy`, `showTotal`, `conditionalFormat`, `cacheFor`, etc.).
+
+### Report Caching
+
+Cache the rendered report output to avoid re-rendering on repeated requests. Cached HTML is stored via Laravel's cache system.
+
+#### `cacheFor(int $minutes)`
+
+Enable caching with a TTL in minutes:
+
+```php
+PdfReport::of(...)->cacheFor(60)->make();
+```
+
+#### `cacheAs(string $key)`
+
+Set a custom cache key (otherwise an auto-generated key based on title, columns, meta, limit, and groupBy is used):
+
+```php
+->cacheFor(60)->cacheAs('monthly-sales-report')
+```
+
+#### `cacheUsing(string $store)`
+
+Use a specific cache store (e.g., `redis`, `file`, `array`):
+
+```php
+->cacheFor(60)->cacheUsing('redis')
+```
+
+#### `noCache()`
+
+Explicitly disable caching (useful to override a previously set `cacheFor`):
+
+```php
+->cacheFor(60)->noCache()  // Caching disabled
+```
+
+> On cache hit, the template rendering step is skipped entirely and the cached HTML is loaded directly into the PDF/CSV engine.
 
 ### Layout & Styling
 
@@ -442,7 +658,9 @@ This creates `config/report-generator.php`:
 
 ```php
 return [
-    'flush' => false, // Enable output buffering flush during report generation
+    'flush'        => false,  // Enable output buffering flush during report generation
+    'cache_store'  => null,   // Default cache store (null = Laravel default)
+    'cache_prefix' => 'report-generator', // Prefix for auto-generated cache keys
 ];
 ```
 
