@@ -1,42 +1,79 @@
 {
-  "name": "samuelterra22/laravel-report-generator",
-  "description": "Rapidly Generate Simple Pdf & Excel Report on Laravel 6 (Using Barryvdh/DomPdf or Barryvdh/laravel-snappy & maatwebsite/excel)",
-  "keywords": [
-    "laravel",
-    "excel",
-    "pdf",
-    "report",
-    "excel report",
-    "pdf report"
-  ],
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Samuel Terra",
-      "email": "samuelterra22@gmail.com"
-    }
-  ],
-  "require": {
-    "php": ">=7.1.0",
-    "illuminate/support": "*",
-    "maatwebsite/excel": "^3.1"
-  },
-  "autoload": {
-    "psr-4": {
-      "SamuelTerra22\\ReportGenerator\\": "src/"
-    }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "SamuelTerra22\\ReportGenerator\\ServiceProvider"
-      ],
-      "aliases": {
-        "PdfReport": "SamuelTerra22\\ReportGenerator\\Facades\\PdfReportFacade",
-        "ExcelReport": "SamuelTerra22\\ReportGenerator\\Facades\\ExcelReportFacade",
-        "CSVReport": "SamuelTerra22\\ReportGenerator\\Facades\\CSVReportFacade::class"
-      }
-    }
-  },
-  "minimum-stability": "dev"
+    "name": "samuelterra22/laravel-report-generator",
+    "description": "Rapidly Generate Simple Pdf, Excel & CSV Reports on Laravel (Using Barryvdh/DomPdf or Barryvdh/laravel-snappy & maatwebsite/excel)",
+    "keywords": [
+        "laravel",
+        "excel",
+        "pdf",
+        "csv",
+        "report",
+        "report-generator"
+    ],
+    "homepage": "https://github.com/samuelterra22/laravel-report-generator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Samuel Terra",
+            "email": "samuelterra22@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0||^12.0",
+        "maatwebsite/excel": "^3.1"
+    },
+    "require-dev": {
+        "barryvdh/laravel-dompdf": "^2.0||^3.0",
+        "laravel/pint": "^1.14",
+        "larastan/larastan": "^2.0||^3.0",
+        "league/csv": "^9.0",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.0",
+        "orchestra/testbench": "^9.0||^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-arch": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan-deprecation-rules": "^1.0||^2.0",
+        "phpstan/phpstan-phpunit": "^1.0||^2.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SamuelTerra22\\ReportGenerator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SamuelTerra22\\ReportGenerator\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SamuelTerra22\\ReportGenerator\\ServiceProvider"
+            ],
+            "aliases": {
+                "PdfReport": "SamuelTerra22\\ReportGenerator\\Facades\\PdfReportFacade",
+                "ExcelReport": "SamuelTerra22\\ReportGenerator\\Facades\\ExcelReportFacade",
+                "CSVReport": "SamuelTerra22\\ReportGenerator\\Facades\\CSVReportFacade"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

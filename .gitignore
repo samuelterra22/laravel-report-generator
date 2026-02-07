@@ -3,3 +3,8 @@ composer.phar
 .DS_Store
 .idea/
 CLAUDE.md
+.phpunit.cache
+.phpstan.cache/
+coverage/
+coverage.xml
+phpunit.xml

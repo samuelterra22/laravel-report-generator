@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     xml \
     mbstring \
     bcmath \
+    && pecl install pcov \
+    && docker-php-ext-enable pcov \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
