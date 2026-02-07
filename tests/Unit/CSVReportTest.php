@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests\Unit;
 
-use SamuelTerra22\ReportGenerator\ReportMedia\CSVReport;
+use SamuelTerra22\ReportGenerator\ReportMedia\CsvReport;
 use SamuelTerra22\ReportGenerator\Tests\TestCase;
 
 class CSVReportTest extends TestCase
 {
-    private function makeReport(array $results = [], array $columns = null): CSVReport
+    private function makeReport(array $results = [], ?array $columns = null): CsvReport
     {
         $resultObjects = array_map(function ($row) {
             return $this->makeResultObject($row);
@@ -18,7 +20,7 @@ class CSVReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of(
             'Test CSV',
             ['Period' => 'January'],
@@ -29,16 +31,18 @@ class CSVReportTest extends TestCase
         return $report;
     }
 
-    private function captureCSVOutput(CSVReport $report, string $filename = 'test'): string
+    private function captureCSVOutput(CsvReport $report, string $filename = 'test'): string
     {
         ob_start();
         $report->download($filename);
+
         return ob_get_clean();
     }
 
     private function parseCSVLines(string $output): array
     {
         $lines = explode("\n", trim($output));
+
         return array_values(array_filter($lines, function ($line) {
             return trim($line) !== '';
         }));
@@ -46,7 +50,7 @@ class CSVReportTest extends TestCase
 
     public function test_csv_show_meta_defaults_to_false()
     {
-        $report = new CSVReport();
+        $report = new CsvReport;
         $reflection = new \ReflectionProperty($report, 'showMeta');
         $reflection->setAccessible(true);
         $this->assertFalse($reflection->getValue($report));
@@ -152,7 +156,7 @@ class CSVReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of('Test', [], $query, ['Name' => 'name', 'Amount' => 'amount']);
         $report->withoutManipulation();
 
@@ -177,7 +181,7 @@ class CSVReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of('Test', [], $query, ['Name' => $closure, 'Amount' => 'amount']);
 
         $output = $this->captureCSVOutput($report);
@@ -192,8 +196,8 @@ class CSVReportTest extends TestCase
         ]);
         $report->editColumn('Amount', [
             'displayAs' => function ($result) {
-                return '$' . $result->amount;
-            }
+                return '$'.$result->amount;
+            },
         ]);
 
         $output = $this->captureCSVOutput($report);
@@ -207,7 +211,7 @@ class CSVReportTest extends TestCase
             ['name' => 'Alice', 'amount' => 100],
         ]);
         $report->editColumn('Amount', [
-            'displayAs' => 'N/A'
+            'displayAs' => 'N/A',
         ]);
 
         $output = $this->captureCSVOutput($report);

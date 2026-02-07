@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests\Feature;
 
 use Mockery;
@@ -20,6 +22,7 @@ class PdfReportIntegrationTest extends TestCase
             if ($condition) {
                 $callback($query);
             }
+
             return $query;
         });
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
@@ -27,11 +30,11 @@ class PdfReportIntegrationTest extends TestCase
         return $query;
     }
 
-    private function makeReportWithHtml(array $results, array $columns = null, array $options = []): string
+    private function makeReportWithHtml(array $results, ?array $columns = null, array $options = []): string
     {
         $query = $this->makeQueryWithResults($results);
 
-        $report = new PdfReport();
+        $report = new PdfReport;
         $report->of(
             $options['title'] ?? 'Integration Report',
             $options['meta'] ?? ['Period' => 'January'],
@@ -39,17 +42,17 @@ class PdfReportIntegrationTest extends TestCase
             $columns ?? ['Name' => 'name', 'Amount' => 'amount']
         );
 
-        if (!empty($options['editColumns'])) {
+        if (! empty($options['editColumns'])) {
             foreach ($options['editColumns'] as $col => $opts) {
                 $report->editColumn($col, $opts);
             }
         }
 
-        if (!empty($options['showTotal'])) {
+        if (! empty($options['showTotal'])) {
             $report->showTotal($options['showTotal']);
         }
 
-        if (!empty($options['groupBy'])) {
+        if (! empty($options['groupBy'])) {
             $report->groupBy($options['groupBy']);
         }
 
@@ -65,11 +68,11 @@ class PdfReportIntegrationTest extends TestCase
             $report->showNumColumn($options['showNumColumn']);
         }
 
-        if (!empty($options['withoutManipulation'])) {
+        if (! empty($options['withoutManipulation'])) {
             $report->withoutManipulation();
         }
 
-        if (!empty($options['css'])) {
+        if (! empty($options['css'])) {
             $report->setCss($options['css']);
         }
 
@@ -79,6 +82,7 @@ class PdfReportIntegrationTest extends TestCase
         $pdfMock->shouldReceive('setOption')->andReturnSelf();
         $pdfMock->shouldReceive('loadHTML')->andReturnUsing(function ($html) use (&$capturedHtml, $pdfMock) {
             $capturedHtml = $html;
+
             return $pdfMock;
         });
         $pdfMock->shouldReceive('setPaper')->andReturnSelf();
@@ -182,8 +186,8 @@ class PdfReportIntegrationTest extends TestCase
             ['name' => 'Alice', 'amount' => 100],
         ], null, [
             'editColumns' => [
-                'Amount' => ['class' => 'right']
-            ]
+                'Amount' => ['class' => 'right'],
+            ],
         ]);
 
         $this->assertStringContainsString('right', $html);

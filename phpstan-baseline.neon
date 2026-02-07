@@ -1,0 +1,63 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Deprecated in PHP 8\.0\: Required parameter \$columns follows optional parameter \$meta\.$#'
+			identifier: parameter.requiredAfterOptional
+			count: 1
+			path: src/ReportGenerator.php
+
+		-
+			message: '#^Deprecated in PHP 8\.0\: Required parameter \$query follows optional parameter \$meta\.$#'
+			identifier: parameter.requiredAfterOptional
+			count: 1
+			path: src/ReportGenerator.php
+
+		-
+			message: '''
+				#^Call to deprecated method createFromFileObject\(\) of class League\\Csv\\AbstractCsv\:
+				since version 9\.27\.0
+
+				Returns a new instance from a SplFileObject\.$#
+			'''
+			identifier: staticMethod.deprecated
+			count: 1
+			path: src/ReportMedia/CsvReport.php
+
+		-
+			message: '''
+				#^Call to deprecated method output\(\) of class League\\Csv\\AbstractCsv\:
+				since version 9\.18\.0$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/ReportMedia/CsvReport.php
+
+		-
+			message: '#^Anonymous function has an unused use \$filename\.$#'
+			identifier: closure.unusedUse
+			count: 2
+			path: src/ReportMedia/ExcelReport.php
+
+		-
+			message: '#^Parameter \#1 \.\.\.\$values of method Illuminate\\Support\\Collection\<int,string\>\:\:push\(\) expects string, null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/ReportMedia/ExcelReport.php
+
+		-
+			message: '#^Variable \$columns might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/ReportMedia/ExcelReport.php
+
+		-
+			message: '#^Dead catch \- Illuminate\\Contracts\\Container\\BindingResolutionException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: src/ReportMedia/PdfReport.php
+
+		-
+			message: '#^Dead catch \- ReflectionException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: src/ReportMedia/PdfReport.php

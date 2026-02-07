@@ -1,25 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use SamuelTerra22\ReportGenerator\ServiceProvider;
+use SamuelTerra22\ReportGenerator\ReportGeneratorServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
     protected function getPackageProviders($app)
     {
         return [
-            ServiceProvider::class,
+            ReportGeneratorServiceProvider::class,
         ];
     }
 
     protected function getPackageAliases($app)
     {
         return [
-            'PdfReport' => \SamuelTerra22\ReportGenerator\Facades\PdfReportFacade::class,
-            'ExcelReport' => \SamuelTerra22\ReportGenerator\Facades\ExcelReportFacade::class,
-            'CSVReport' => \SamuelTerra22\ReportGenerator\Facades\CSVReportFacade::class,
+            'PdfReport' => \SamuelTerra22\ReportGenerator\Facades\PdfReport::class,
+            'ExcelReport' => \SamuelTerra22\ReportGenerator\Facades\ExcelReport::class,
+            'CsvReport' => \SamuelTerra22\ReportGenerator\Facades\CsvReport::class,
         ];
     }
 
@@ -37,6 +39,7 @@ abstract class TestCase extends OrchestraTestCase
             if ($condition) {
                 $callback($query);
             }
+
             return $query;
         });
         $query->shouldReceive('cursor')->andReturn($cursor);
@@ -46,7 +49,8 @@ abstract class TestCase extends OrchestraTestCase
 
     protected function makeResultObject(array $data)
     {
-        return new class($data) {
+        return new class($data)
+        {
             private $data;
 
             public function __construct(array $data)

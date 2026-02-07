@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests\Unit;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -21,6 +23,7 @@ class PdfReportTest extends TestCase
             if ($condition) {
                 $callback($query);
             }
+
             return $query;
         });
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
@@ -32,7 +35,7 @@ class PdfReportTest extends TestCase
     {
         $query = $this->makeQueryWithResults($results);
 
-        $report = new PdfReport();
+        $report = new PdfReport;
         $report->of(
             'Test PDF',
             ['Period' => 'January'],

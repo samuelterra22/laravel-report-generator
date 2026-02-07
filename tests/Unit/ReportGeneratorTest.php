@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests\Unit;
 
 use SamuelTerra22\ReportGenerator\Tests\Stubs\ConcreteReportGenerator;
@@ -12,7 +14,7 @@ class ReportGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->report = new ConcreteReportGenerator();
+        $this->report = new ConcreteReportGenerator;
     }
 
     public function test_default_values()
@@ -34,11 +36,11 @@ class ReportGeneratorTest extends TestCase
     public function test_apply_flush_reads_config()
     {
         config(['report-generator.flush' => true]);
-        $report = new ConcreteReportGenerator();
+        $report = new ConcreteReportGenerator;
         $this->assertTrue($report->getApplyFlush());
 
         config(['report-generator.flush' => false]);
-        $report = new ConcreteReportGenerator();
+        $report = new ConcreteReportGenerator;
         $this->assertFalse($report->getApplyFlush());
     }
 
@@ -76,7 +78,7 @@ class ReportGeneratorTest extends TestCase
     {
         $query = $this->mockQueryBuilder();
         $closure = function ($result) {
-            return $result->first . ' ' . $result->last;
+            return $result->first.' '.$result->last;
         };
         $this->report->of('Title', [], $query, ['Full Name' => $closure]);
 
@@ -144,7 +146,9 @@ class ReportGeneratorTest extends TestCase
 
     public function test_edit_column()
     {
-        $result = $this->report->editColumn('Price', ['class' => 'right', 'displayAs' => function ($r) { return '$' . $r->price; }]);
+        $result = $this->report->editColumn('Price', ['class' => 'right', 'displayAs' => function ($r) {
+            return '$'.$r->price;
+        }]);
         $this->assertSame($this->report, $result);
 
         $editColumns = $this->report->getEditColumns();

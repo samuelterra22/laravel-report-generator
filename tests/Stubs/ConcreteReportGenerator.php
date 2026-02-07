@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests\Stubs;
 
 use SamuelTerra22\ReportGenerator\ReportGenerator;

@@ -1,30 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\ReportMedia;
 
-use App;
 use Closure;
 use Exception;
 use League\Csv\Writer;
 use SamuelTerra22\ReportGenerator\ReportGenerator;
 
-class CSVReport extends ReportGenerator
+class CsvReport extends ReportGenerator
 {
     protected $showMeta = false;
 
     public function download($filename)
     {
-        if (!class_exists(Writer::class)) {
+        if (! class_exists(Writer::class)) {
             throw new Exception('Please install league/csv to generate CSV Report!');
         }
 
-        $csv = Writer::createFromFileObject(new \SplTempFileObject());
+        $csv = Writer::createFromFileObject(new \SplTempFileObject);
 
         if ($this->showMeta) {
             foreach ($this->headers['meta'] as $key => $value) {
                 $csv->insertOne([
                     $key,
-                    $value
+                    $value,
                 ]);
             }
             $csv->insertOne([' ']);
@@ -34,7 +35,7 @@ class CSVReport extends ReportGenerator
 
         if ($this->showHeader) {
             $columns = array_keys($this->columns);
-            if (!$this->withoutManipulation && $this->showNumColumn) {
+            if (! $this->withoutManipulation && $this->showNumColumn) {
                 array_unshift($columns, 'No');
             }
             $csv->insertOne($columns);
@@ -57,7 +58,7 @@ class CSVReport extends ReportGenerator
             $ctr++;
         }
 
-        $csv->output($filename . '.csv');
+        $csv->output($filename.'.csv');
     }
 
     private function formatRow($result)
@@ -75,7 +76,7 @@ class CSVReport extends ReportGenerator
                     $displayAs = $this->editColumns[$colName]['displayAs'];
                     if (is_object($displayAs) && $displayAs instanceof Closure) {
                         $displayedColValue = $displayAs($result);
-                    } elseif (!(is_object($displayAs) && $displayAs instanceof Closure)) {
+                    } elseif (! (is_object($displayAs) && $displayAs instanceof Closure)) {
                         $displayedColValue = $displayAs;
                     }
                 }

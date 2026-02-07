@@ -1,17 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests\Feature;
 
 use Mockery;
-use SamuelTerra22\ReportGenerator\ReportMedia\CSVReport;
+use SamuelTerra22\ReportGenerator\ReportMedia\CsvReport;
 use SamuelTerra22\ReportGenerator\Tests\TestCase;
 
 class CSVReportIntegrationTest extends TestCase
 {
-    private function captureCSVOutput(CSVReport $report, string $filename = 'test'): string
+    private function captureCSVOutput(CsvReport $report, string $filename = 'test'): string
     {
         ob_start();
         $report->download($filename);
+
         return ob_get_clean();
     }
 
@@ -21,12 +24,14 @@ class CSVReportIntegrationTest extends TestCase
         $query->shouldReceive('take')->andReturnSelf();
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
+
         return $query;
     }
 
     private function parseCSVLines(string $output): array
     {
         $lines = explode("\n", trim($output));
+
         return array_values(array_filter($lines, function ($line) {
             return trim($line) !== '';
         }));
@@ -42,7 +47,7 @@ class CSVReportIntegrationTest extends TestCase
 
         $query = $this->makeQuery($results);
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of('Sales Report', ['Period' => 'Q1'], $query, ['Name' => 'name', 'Amount' => 'amount']);
 
         $output = $this->captureCSVOutput($report);
@@ -71,13 +76,17 @@ class CSVReportIntegrationTest extends TestCase
 
         $query = $this->makeQuery($results);
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of('Report', [], $query, [
-            'Full Name' => function ($r) { return $r->first . ' ' . $r->last; },
+            'Full Name' => function ($r) {
+                return $r->first.' '.$r->last;
+            },
             'Amount' => 'amount',
         ]);
         $report->editColumn('Amount', [
-            'displayAs' => function ($r) { return '$' . number_format($r->amount, 2); }
+            'displayAs' => function ($r) {
+                return '$'.number_format($r->amount, 2);
+            },
         ]);
 
         $output = $this->captureCSVOutput($report);
@@ -95,7 +104,7 @@ class CSVReportIntegrationTest extends TestCase
 
         $query = $this->makeQuery($results);
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of('Report', [], $query, ['Name' => 'name', 'Amount' => 'amount']);
         $report->withoutManipulation();
 
@@ -119,7 +128,7 @@ class CSVReportIntegrationTest extends TestCase
 
         $query = $this->makeQuery($results);
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of('Report', ['Company' => 'Acme', 'Period' => 'Q1'], $query, ['Name' => 'name', 'Amount' => 'amount']);
         $report->showMeta(true);
 
@@ -142,7 +151,7 @@ class CSVReportIntegrationTest extends TestCase
 
         $query = $this->makeQuery($results);
 
-        $report = new CSVReport();
+        $report = new CsvReport;
         $report->of('Report', [], $query, ['Name' => 'name', 'Amount' => 'amount']);
         $report->limit(2);
 

@@ -1,22 +1,29 @@
 # Laravel Report Generator
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/samuelterra22/laravel-report-generator.svg?style=flat-square)](https://packagist.org/packages/samuelterra22/laravel-report-generator)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/samuelterra22/laravel-report-generator/run-tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/samuelterra22/laravel-report-generator/actions?query=workflow%3Arun-tests+branch%3Amaster)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/samuelterra22/laravel-report-generator/fix-php-code-style-issues.yml?branch=master&label=code%20style&style=flat-square)](https://github.com/samuelterra22/laravel-report-generator/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amaster)
+[![Total Downloads](https://img.shields.io/packagist/dt/samuelterra22/laravel-report-generator.svg?style=flat-square)](https://packagist.org/packages/samuelterra22/laravel-report-generator)
+
 Rapidly generate PDF, Excel (XLSX), and CSV reports from Eloquent queries or query builders in Laravel. Provides a fluent, chainable API for building reports with grouping, column editing, totals, and custom styling.
 
 ## Compatibility
 
-| Laravel | PHP    | Status |
-|---------|--------|--------|
-| 10.x    | 8.2+   | Supported |
-| 11.x    | 8.2+   | Supported |
-| 12.x    | 8.2+   | Supported |
+| Laravel | PHP    |
+|---------|--------|
+| 10.x    | 8.2+   |
+| 11.x    | 8.2+   |
+| 12.x    | 8.2+   |
 
 ## Installation
+
+You can install the package via composer:
 
 ```bash
 composer require samuelterra22/laravel-report-generator
 ```
 
-The package auto-discovers its service provider and facades in Laravel 5.5+.
+The package auto-discovers its service provider and facades.
 
 ### PDF Engine (pick one)
 
@@ -36,11 +43,16 @@ composer require league/csv
 
 ## Configuration
 
-Publish the config and/or view templates:
+You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag=laravel-report:config
-php artisan vendor:publish --tag=laravel-report:view-template
+php artisan vendor:publish --tag="report-generator-config"
+```
+
+You can publish the views with:
+
+```bash
+php artisan vendor:publish --tag="report-generator-views"
 ```
 
 ## Usage
@@ -48,7 +60,7 @@ php artisan vendor:publish --tag=laravel-report:view-template
 ### PDF Report
 
 ```php
-use PdfReport;
+use SamuelTerra22\ReportGenerator\Facades\PdfReport;
 
 $query = User::select(['name', 'email', 'city', 'balance']);
 
@@ -71,7 +83,7 @@ Available methods: `make()`, `stream()`, `download()`.
 ### Excel Report
 
 ```php
-use ExcelReport;
+use SamuelTerra22\ReportGenerator\Facades\ExcelReport;
 
 $query = User::select(['name', 'email', 'balance']);
 
@@ -90,11 +102,11 @@ Available methods: `make()`, `download()`, `simpleDownload()`.
 ### CSV Report
 
 ```php
-use CSVReport;
+use SamuelTerra22\ReportGenerator\Facades\CsvReport;
 
 $query = User::select(['name', 'email', 'balance']);
 
-$report = CSVReport::of('User Report', ['Created' => now()->format('d M Y')], $query, [
+CsvReport::of('User Report', ['Created' => now()->format('d M Y')], $query, [
         'Name'    => 'name',
         'Email'   => 'email',
         'Balance' => 'balance',
@@ -123,14 +135,21 @@ All report types support these chainable methods:
 | `withoutManipulation()` | Skip column editing for faster generation |
 | `simple()` | Use simple Excel version (direct sheet manipulation) |
 
-## Lumen Support
+## Testing
 
-The package detects Lumen automatically and loads polyfills for `config_path()` and `public_path()`. Register the service provider manually in `bootstrap/app.php`:
-
-```php
-$app->register(SamuelTerra22\ReportGenerator\ServiceProvider::class);
+```bash
+composer test
 ```
+
+## Changelog
+
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+
+## Credits
+
+- [Samuel Terra](https://github.com/samuelterra22)
+- [All Contributors](../../contributors)
 
 ## License
 
-MIT
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

@@ -20,7 +20,8 @@
     "require": {
         "php": "^8.2",
         "illuminate/support": "^10.0||^11.0||^12.0",
-        "maatwebsite/excel": "^3.1"
+        "maatwebsite/excel": "^3.1",
+        "spatie/laravel-package-tools": "^1.16"
     },
     "require-dev": {
         "barryvdh/laravel-dompdf": "^2.0||^3.0",
@@ -65,12 +66,12 @@
     "extra": {
         "laravel": {
             "providers": [
-                "SamuelTerra22\\ReportGenerator\\ServiceProvider"
+                "SamuelTerra22\\ReportGenerator\\ReportGeneratorServiceProvider"
             ],
             "aliases": {
-                "PdfReport": "SamuelTerra22\\ReportGenerator\\Facades\\PdfReportFacade",
-                "ExcelReport": "SamuelTerra22\\ReportGenerator\\Facades\\ExcelReportFacade",
-                "CSVReport": "SamuelTerra22\\ReportGenerator\\Facades\\CSVReportFacade"
+                "PdfReport": "SamuelTerra22\\ReportGenerator\\Facades\\PdfReport",
+                "ExcelReport": "SamuelTerra22\\ReportGenerator\\Facades\\ExcelReport",
+                "CsvReport": "SamuelTerra22\\ReportGenerator\\Facades\\CsvReport"
             }
         }
     },

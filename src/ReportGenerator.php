@@ -1,27 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator;
 
 use Config;
 use Illuminate\Support\Str;
 
-class ReportGenerator
+abstract class ReportGenerator
 {
     protected $applyFlush;
+
     protected $headers;
+
     protected $columns;
+
     protected $query;
+
     protected $limit = null;
+
     protected $groupByArr = [];
+
     protected $paper = 'a4';
+
     protected $orientation = 'portrait';
+
     protected $editColumns = [];
+
     protected $showNumColumn = true;
+
     protected $showTotalColumns = [];
+
     protected $styles = [];
+
     protected $simpleVersion = false;
+
     protected $withoutManipulation = false;
+
     protected $showMeta = true;
+
     protected $showHeader = true;
 
     public function __construct()
@@ -29,11 +46,11 @@ class ReportGenerator
         $this->applyFlush = (bool) Config::get('report-generator.flush', true);
     }
 
-    public function of($title, Array $meta = [], $query, Array $columns)
+    public function of($title, array $meta, $query, array $columns)
     {
         $this->headers = [
             'title' => $title,
-            'meta'  => $meta
+            'meta' => $meta,
         ];
 
         $this->query = $query;
@@ -77,7 +94,7 @@ class ReportGenerator
         return $this;
     }
 
-    private function mapColumns(Array $columns)
+    private function mapColumns(array $columns)
     {
         $result = [];
 
@@ -99,7 +116,7 @@ class ReportGenerator
         return $this;
     }
 
-    public function editColumn($columnName, Array $options)
+    public function editColumn($columnName, array $options)
     {
         foreach ($options as $option => $value) {
             $this->editColumns[$columnName][$option] = $value;
@@ -108,7 +125,7 @@ class ReportGenerator
         return $this;
     }
 
-    public function editColumns(Array $columnNames, Array $options)
+    public function editColumns(array $columnNames, array $options)
     {
         foreach ($columnNames as $columnName) {
             $this->editColumn($columnName, $options);
@@ -117,7 +134,7 @@ class ReportGenerator
         return $this;
     }
 
-    public function showTotal(Array $columns)
+    public function showTotal(array $columns)
     {
         $this->showTotalColumns = $columns;
 
@@ -149,12 +166,12 @@ class ReportGenerator
         return $this;
     }
 
-    public function setCss(Array $styles)
+    public function setCss(array $styles)
     {
         foreach ($styles as $selector => $style) {
             array_push($this->styles, [
                 'selector' => $selector,
-                'style' => $style
+                'style' => $style,
             ]);
         }
 

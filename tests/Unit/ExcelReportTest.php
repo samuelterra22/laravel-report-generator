@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamuelTerra22\ReportGenerator\Tests\Unit;
 
-use Closure;
 use Mockery;
 use SamuelTerra22\ReportGenerator\ReportMedia\ExcelReport;
 use SamuelTerra22\ReportGenerator\Tests\TestCase;
 
 class ExcelReportTest extends TestCase
 {
-    private function makeReport(array $results = [], array $columns = null): ExcelReport
+    private function makeReport(array $results = [], ?array $columns = null): ExcelReport
     {
         $resultObjects = array_map(function ($row) {
             return $this->makeResultObject($row);
@@ -21,11 +22,12 @@ class ExcelReportTest extends TestCase
             if ($condition) {
                 $callback($query);
             }
+
             return $query;
         });
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new ExcelReport();
+        $report = new ExcelReport;
         $report->of(
             'Test Excel',
             ['Period' => 'January'],
@@ -38,7 +40,7 @@ class ExcelReportTest extends TestCase
 
     private function setupExcelMock(): \stdClass
     {
-        $collector = new \stdClass();
+        $collector = new \stdClass;
         $collector->appendedRows = [];
 
         $sheetMock = Mockery::mock();
@@ -56,6 +58,7 @@ class ExcelReportTest extends TestCase
         $excelMock = Mockery::mock();
         $excelMock->shouldReceive('create')->andReturnUsing(function ($filename, $callback) use ($excelObjectMock) {
             $callback($excelObjectMock);
+
             return $excelObjectMock;
         });
 
@@ -197,6 +200,7 @@ class ExcelReportTest extends TestCase
         $excelMock = Mockery::mock();
         $excelMock->shouldReceive('create')->andReturnUsing(function ($filename, $callback) use ($excelObjectMock) {
             $callback($excelObjectMock);
+
             return $excelObjectMock;
         });
 
@@ -227,6 +231,7 @@ class ExcelReportTest extends TestCase
         $excelMock = Mockery::mock();
         $excelMock->shouldReceive('create')->andReturnUsing(function ($filename, $callback) use ($excelObjectMock) {
             $callback($excelObjectMock);
+
             return $excelObjectMock;
         });
 
@@ -253,6 +258,7 @@ class ExcelReportTest extends TestCase
         $excelMock = Mockery::mock();
         $excelMock->shouldReceive('create')->andReturnUsing(function ($filename, $callback) use ($excelObjectMock) {
             $callback($excelObjectMock);
+
             return $excelObjectMock;
         });
 
@@ -280,6 +286,7 @@ class ExcelReportTest extends TestCase
         $excelMock = Mockery::mock();
         $excelMock->shouldReceive('create')->andReturnUsing(function ($filename, $callback) use ($excelObjectMock) {
             $callback($excelObjectMock);
+
             return $excelObjectMock;
         });
 
@@ -309,6 +316,7 @@ class ExcelReportTest extends TestCase
         $excelMock = Mockery::mock();
         $excelMock->shouldReceive('create')->andReturnUsing(function ($filename, $callback) use ($excelObjectMock) {
             $callback($excelObjectMock);
+
             return $excelObjectMock;
         });
 
@@ -321,7 +329,7 @@ class ExcelReportTest extends TestCase
     public function test_simple_version_with_closure_column()
     {
         $closure = function ($result) {
-            return $result->name . ' - ' . $result->amount;
+            return $result->name.' - '.$result->amount;
         };
 
         $resultObjects = [
@@ -333,7 +341,7 @@ class ExcelReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new ExcelReport();
+        $report = new ExcelReport;
         $report->of(
             'Test Excel',
             [],
@@ -365,8 +373,8 @@ class ExcelReportTest extends TestCase
         $report->showMeta(false);
         $report->editColumn('Amount', [
             'displayAs' => function ($result) {
-                return '$' . $result->amount;
-            }
+                return '$'.$result->amount;
+            },
         ]);
 
         $collector = $this->setupExcelMock();
@@ -423,7 +431,7 @@ class ExcelReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new ExcelReport();
+        $report = new ExcelReport;
         $report->of(
             'Group Report',
             [],
@@ -461,7 +469,7 @@ class ExcelReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new ExcelReport();
+        $report = new ExcelReport;
         $report->of('Report', [], $query, ['Name' => 'name', 'Dept' => 'department', 'Amount' => 'amount']);
         $report->showMeta(false);
         $report->groupBy('Dept');
@@ -474,7 +482,9 @@ class ExcelReportTest extends TestCase
         // Find group total row with SUM prefix
         $foundSum = false;
         foreach ($collector->appendedRows as $row) {
-            if (!is_array($row)) continue;
+            if (! is_array($row)) {
+                continue;
+            }
             foreach ($row as $cell) {
                 if (is_string($cell) && str_contains($cell, 'SUM')) {
                     $foundSum = true;
@@ -496,9 +506,11 @@ class ExcelReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $deptClosure = function ($result) { return strtoupper($result->department); };
+        $deptClosure = function ($result) {
+            return strtoupper($result->department);
+        };
 
-        $report = new ExcelReport();
+        $report = new ExcelReport;
         $report->of('Report', [], $query, ['Name' => 'name', 'Dept' => $deptClosure, 'Amount' => 'amount']);
         $report->showMeta(false);
         $report->groupBy('Dept');
@@ -529,7 +541,7 @@ class ExcelReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new ExcelReport();
+        $report = new ExcelReport;
         $report->of('Report', [], $query, ['Name' => 'name', 'Amount' => 'amount']);
         $report->showMeta(false);
         $report->withoutManipulation();
@@ -555,7 +567,7 @@ class ExcelReportTest extends TestCase
         ]);
         $report->showMeta(false);
         $report->editColumn('Amount', [
-            'displayAs' => 'FIXED'
+            'displayAs' => 'FIXED',
         ]);
 
         $collector = $this->setupExcelMock();
@@ -609,7 +621,7 @@ class ExcelReportTest extends TestCase
         $query->shouldReceive('when')->andReturnSelf();
         $query->shouldReceive('cursor')->andReturn(new \ArrayIterator($resultObjects));
 
-        $report = new ExcelReport();
+        $report = new ExcelReport;
         $report->of('Report', [], $query, ['Name' => 'name', 'Dept' => 'department', 'Amount' => 'amount']);
         $report->showMeta(false);
         $report->groupBy('Dept');

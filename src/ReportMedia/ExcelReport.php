@@ -1,7 +1,8 @@
 <?php
 
-namespace SamuelTerra22\ReportGenerator\ReportMedia;
+declare(strict_types=1);
 
+namespace SamuelTerra22\ReportGenerator\ReportMedia;
 
 use App;
 use Closure;
@@ -10,6 +11,7 @@ use SamuelTerra22\ReportGenerator\ReportGenerator;
 class ExcelReport extends ReportGenerator
 {
     private $format = 'xlsx';
+
     private $total = [];
 
     public function setFormat($format)
@@ -22,7 +24,7 @@ class ExcelReport extends ReportGenerator
     public function make($filename, $simpleVersion = false)
     {
         if ($simpleVersion) {
-            return App::make('excel')->create($filename, function ($excel) use ($filename) {
+            return App::make('excel')->create($filename, function ($excel) {
                 $excel->sheet('Sheet 1', function ($sheet) {
                     $sheet->setColumnFormat(['A:Z' => '@']);
                     $ctr = 1;
@@ -34,14 +36,14 @@ class ExcelReport extends ReportGenerator
                     }
                     if ($this->showTotalColumns != []) {
                         foreach ($this->columns as $colName => $colData) {
-                            if (!array_key_exists($colName, $this->showTotalColumns)) {
+                            if (! array_key_exists($colName, $this->showTotalColumns)) {
                                 $grandTotalSkip++;
                             } else {
                                 break;
                             }
                         }
                     }
-                    $grandTotalSkip = !$this->showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
+                    $grandTotalSkip = ! $this->showNumColumn ? $grandTotalSkip - 1 : $grandTotalSkip;
 
                     $sheet->appendRow([$this->headers['title']]);
                     $sheet->appendRow([' ']);
@@ -50,7 +52,7 @@ class ExcelReport extends ReportGenerator
                         foreach ($this->headers['meta'] as $key => $value) {
                             $sheet->appendRow([
                                 $key,
-                                $value
+                                $value,
                             ]);
                         }
                         $sheet->appendRow([' ']);
@@ -58,7 +60,7 @@ class ExcelReport extends ReportGenerator
 
                     if ($this->showHeader) {
                         $columns = array_keys($this->columns);
-                        if (!$this->withoutManipulation && $this->showNumColumn) {
+                        if (! $this->withoutManipulation && $this->showNumColumn) {
                             array_unshift($columns, 'No');
                         }
                         $sheet->appendRow($columns);
@@ -93,8 +95,8 @@ class ExcelReport extends ReportGenerator
                                         if ($this->showTotalColumns[$columnName] == 'point') {
                                             $totalRows->push(number_format($this->total[$columnName], 2, '.', ','));
                                         } else {
-                                            $totalRows->push(strtoupper($this->showTotalColumns[$columnName]) . ' ' . number_format($this->total[$columnName],
-                                                    2, '.', ','));
+                                            $totalRows->push(strtoupper($this->showTotalColumns[$columnName]).' '.number_format($this->total[$columnName],
+                                                2, '.', ','));
                                         }
                                     } else {
                                         $totalRows->push(null);
@@ -138,8 +140,8 @@ class ExcelReport extends ReportGenerator
                                 if ($this->showTotalColumns[$columnName] == 'point') {
                                     $totalRows->push(number_format($this->total[$columnName], 2, '.', ','));
                                 } else {
-                                    $totalRows->push(strtoupper($this->showTotalColumns[$columnName]) . ' ' . number_format($this->total[$columnName],
-                                            2, '.', ','));
+                                    $totalRows->push(strtoupper($this->showTotalColumns[$columnName]).' '.number_format($this->total[$columnName],
+                                        2, '.', ','));
                                 }
                             } else {
                                 $totalRows->push(null);
@@ -150,7 +152,7 @@ class ExcelReport extends ReportGenerator
                 });
             });
         } else {
-            return App::make('excel')->create($filename, function ($excel) use ($filename) {
+            return App::make('excel')->create($filename, function ($excel) {
                 $excel->sheet('Sheet 1', function ($sheet) {
                     $headers = $this->headers;
                     $query = $this->query;
@@ -207,7 +209,7 @@ class ExcelReport extends ReportGenerator
                     $displayAs = $this->editColumns[$colName]['displayAs'];
                     if (is_object($displayAs) && $displayAs instanceof Closure) {
                         $displayedColValue = $displayAs($result);
-                    } elseif (!(is_object($displayAs) && $displayAs instanceof Closure)) {
+                    } elseif (! (is_object($displayAs) && $displayAs instanceof Closure)) {
                         $displayedColValue = $displayAs;
                     }
                 }
