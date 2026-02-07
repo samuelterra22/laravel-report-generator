@@ -6,6 +6,46 @@ Rapidly Generate Simple Pdf Report on Laravel (Using [barryvdh/laravel-dompdf](h
 
 This package provides a simple pdf & excel report generators to speed up your workflow
 
+## Development Setup
+
+If you want to contribute or develop this package locally, a Docker-based environment is provided so you don't need PHP or Composer installed on your machine.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/) (included with Docker Desktop)
+
+### Getting Started
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/samuelterra22/laravel-report-generator.git
+cd laravel-report-generator
+```
+
+2. Build the Docker image:
+
+```bash
+docker compose build
+```
+
+3. Install dependencies:
+
+```bash
+docker compose run --rm php composer install
+```
+
+### Running Commands
+
+All PHP and Composer commands should be run through Docker:
+
+```bash
+docker compose run --rm php composer update          # Update dependencies
+docker compose run --rm php composer require <pkg>   # Add a new dependency
+docker compose run --rm php php <script.php>         # Run a PHP script
+```
+
 ## Installation
 Add package to your composer:
 
