@@ -448,7 +448,7 @@ Register callbacks that fire at specific points in the report lifecycle. Useful 
     Log::info('Report generation started');
 })
 ->onRow(function ($row, int $index) {
-    // Fires for each row -- useful for progress tracking
+    // Fires for each row -- useful for progress tracking.    
 })
 ->onAfterRender(function () {
     Log::info('Report rendering complete');
