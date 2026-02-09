@@ -27,7 +27,7 @@
         "barryvdh/laravel-dompdf": "^2.0||^3.0",
         "laravel/pint": "^1.14",
         "larastan/larastan": "^2.0||^3.0",
-        "league/csv": "^9.2",
+        "league/csv": "^9.7",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^7.0||^8.0",
         "orchestra/testbench": "^8.0||^9.2||^10.0",
